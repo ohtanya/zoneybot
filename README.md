@@ -46,22 +46,36 @@ A Discord bot that helps server members coordinate across different timezones by
    npm install -g pm2
    ```
 
-2. **Edit the ecosystem config:**
+2. **Set your Discord bot token:**
    ```bash
-   nano ecosystem.config.js
-   # Replace 'your_actual_bot_token_here' with your real Discord bot token
+   export DISCORD_BOT_TOKEN="your_actual_bot_token_here"
    ```
 
-3. **Start with PM2:**
+3. **Start with PM2 (first time):**
    ```bash
    pm2 start ecosystem.config.js
    ```
 
-4. **Monitor the bot:**
+4. **After first setup, you can use:**
+   ```bash
+   pm2 start zoneybot    # Start the bot
+   pm2 stop zoneybot     # Stop the bot  
+   pm2 restart zoneybot  # Restart the bot
+   pm2 delete zoneybot   # Remove from PM2
+   ```
+
+5. **Monitor the bot:**
    ```bash
    pm2 status
    pm2 logs zoneybot
    ```
+
+### Alternative: Quick Start Script
+
+You can also use the included start script:
+```bash
+./start.sh
+```
 
 ## Bot Permissions
 
