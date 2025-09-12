@@ -47,6 +47,27 @@ async def settimezone(interaction: discord.Interaction, timezone: str):
             f"• `Asia/Tokyo`"
         )
 
+@bot.tree.command(name="settimezone_admin", description="[ADMIN] Set timezone for another user")
+async def settimezone_admin(interaction: discord.Interaction, member: discord.Member, timezone: str):
+    """Admin command to set timezone for another user"""
+    # Check if user has administrator permissions
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(f"❌ {BOT_NAME}: You need administrator permissions to use this command.")
+        return
+    
+    try:
+        pytz.timezone(timezone)  # validate
+        user_timezones[member.id] = timezone
+        await interaction.response.send_message(f"✅ {BOT_NAME}: Timezone set to `{timezone}` for {member.display_name} (set by admin {interaction.user.display_name})")
+    except Exception:
+        await interaction.response.send_message(
+            f"❌ {BOT_NAME}: Invalid timezone `{timezone}`\n"
+            f"Use `/timezones` to see available options or try formats like:\n"
+            f"• `America/New_York`\n"
+            f"• `Europe/London`\n"
+            f"• `Asia/Tokyo`"
+        )
+
 @bot.tree.command(name="time", description="Show local time for yourself or another member")
 async def time(interaction: discord.Interaction, member: discord.Member = None):
     """Show local time for yourself or another member"""
