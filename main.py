@@ -51,12 +51,37 @@ async def settimezone(interaction: discord.Interaction, timezone: str):
 async def time(interaction: discord.Interaction, member: discord.Member = None):
     """Show local time for yourself or another member"""
     member = member or interaction.user
-    tz = user_timezones.get(member.id)
-    if tz:
-        now = datetime.now(pytz.timezone(tz)).strftime("%Y-%m-%d %H:%M")
-        await interaction.response.send_message(f"🕒 {BOT_NAME}: {member.display_name}'s local time: **{now}** ({tz})")
-    else:
+    target_tz = user_timezones.get(member.id)
+    
+    if not target_tz:
         await interaction.response.send_message(f"⚠️ {BOT_NAME}: {member.display_name} hasn't set a timezone yet. Use `/settimezone`")
+        return
+    
+    # Get the target user's current time
+    target_time = datetime.now(pytz.timezone(target_tz))
+    
+    # Get the requesting user's timezone for comparison
+    requester_tz = user_timezones.get(interaction.user.id)
+    
+    # Format the time nicely
+    time_24h = target_time.strftime("%Y-%m-%d %H:%M")
+    time_12h = target_time.strftime("%-I:%M%p").lower()  # 4:46pm format
+    
+    # Determine day relative to requester
+    day_suffix = ""
+    if requester_tz:
+        requester_time = datetime.now(pytz.timezone(requester_tz))
+        target_date = target_time.date()
+        requester_date = requester_time.date()
+        
+        if target_date > requester_date:
+            day_suffix = " TOMORROW"
+        elif target_date < requester_date:
+            day_suffix = " YESTERDAY"
+    
+    await interaction.response.send_message(
+        f"🕒 {BOT_NAME}: It's {time_24h} ({time_12h}{day_suffix}) for {member.display_name}."
+    )
 
 @bot.tree.command(name="times", description="Show a list of all users and their local times")
 async def times(interaction: discord.Interaction):
@@ -65,12 +90,32 @@ async def times(interaction: discord.Interaction):
         await interaction.response.send_message(f"{BOT_NAME}: No users have set their timezone yet.")
         return
 
+    # Get requester's timezone for day comparison
+    requester_tz = user_timezones.get(interaction.user.id)
+    requester_time = None
+    if requester_tz:
+        requester_time = datetime.now(pytz.timezone(requester_tz))
+
     lines = []
     for uid, tz in user_timezones.items():
         member = interaction.guild.get_member(uid)
         if member:
-            now = datetime.now(pytz.timezone(tz)).strftime("%H:%M")
-            lines.append(f"{member.display_name} — {now} ({tz})")
+            user_time = datetime.now(pytz.timezone(tz))
+            time_12h = user_time.strftime("%-I:%M%p").lower()
+            
+            # Determine day suffix relative to requester
+            day_suffix = ""
+            if requester_time:
+                user_date = user_time.date()
+                requester_date = requester_time.date()
+                
+                if user_date > requester_date:
+                    day_suffix = " tomorrow"
+                elif user_date < requester_date:
+                    day_suffix = " yesterday"
+            
+            lines.append(f"{member.display_name} — {time_12h}{day_suffix}")
+    
     await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\n" + "\n".join(lines))
 
 @bot.tree.command(name="timezones", description="Search for available timezones by region or city")
