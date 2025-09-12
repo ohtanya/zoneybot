@@ -12,7 +12,8 @@ if not TOKEN:
     exit(1)
 
 intents = discord.Intents.default()
-intents.message_content = True
+# Remove message_content intent since we only use slash commands
+# intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 # Store user timezones (replace with database for production)
@@ -78,8 +79,14 @@ async def timezones(interaction: discord.Interaction, search: str = None):
     all_timezones = pytz.all_timezones
     
     if search:
+        # Normalize search term - replace spaces with underscores for better matching
+        search_normalized = search.replace(" ", "_")
+        
         # Filter timezones that contain the search term (case-insensitive)
-        filtered_timezones = [tz for tz in all_timezones if search.lower() in tz.lower()]
+        # Try both original search and normalized version
+        filtered_timezones = [tz for tz in all_timezones if 
+                            search.lower() in tz.lower() or 
+                            search_normalized.lower() in tz.lower()]
         
         if not filtered_timezones:
             await interaction.response.send_message(f"❌ No timezones found containing '{search}'. Try a city, country, or region name.")
