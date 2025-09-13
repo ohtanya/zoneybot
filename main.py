@@ -152,6 +152,7 @@ async def times(interaction: discord.Interaction):
         if member:
             print(f"DEBUG: Found member {member.display_name}")
             user_time = datetime.now(pytz.timezone(tz))
+            time_24h = user_time.strftime("%H:%M")
             time_12h = user_time.strftime("%-I:%M%p").lower()
             
             # Determine day suffix relative to requester
@@ -165,7 +166,8 @@ async def times(interaction: discord.Interaction):
                 elif user_date < requester_date:
                     day_suffix = " yesterday"
             
-            lines.append(f"{member.display_name} — {time_12h}{day_suffix}")
+            # Show both 24h and 12h formats
+            lines.append(f"{member.display_name} — {time_24h} ({time_12h}){day_suffix}")
         else:
             print(f"DEBUG: Could not find member for user ID {uid} in guild {interaction.guild.name}")
     
