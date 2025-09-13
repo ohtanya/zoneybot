@@ -56,7 +56,7 @@ async def ping(interaction: discord.Interaction):
     """Simple ping command"""
     await interaction.response.send_message("🏓 Pong!")
 
-@bot.tree.command(name="settz", description="Set timezone for another user (requires admin permissions)")
+@bot.tree.command(name="tzset", description="Set timezone for someone else")
 async def settimezone_admin(interaction: discord.Interaction, member: discord.Member, timezone: str):
     """Admin command to set timezone for another user"""
     # Check if user has administrator permissions
