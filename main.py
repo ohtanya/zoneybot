@@ -28,6 +28,9 @@ async def on_ready():
     try:
         synced = await bot.tree.sync()
         print(f"✅ Synced {len(synced)} slash command(s)")
+        # Debug: print all synced command names
+        for cmd in synced:
+            print(f"   - {cmd.name}: {cmd.description}")
     except Exception as e:
         print(f"❌ Failed to sync commands: {e}")
 
@@ -47,7 +50,7 @@ async def settimezone(interaction: discord.Interaction, timezone: str):
             f"• `Asia/Tokyo`"
         )
 
-@bot.tree.command(name="settimezone_admin", description="[ADMIN] Set timezone for another user")
+@bot.tree.command(name="settimezone-admin", description="Admin: Set timezone for another user")
 async def settimezone_admin(interaction: discord.Interaction, member: discord.Member, timezone: str):
     """Admin command to set timezone for another user"""
     # Check if user has administrator permissions
