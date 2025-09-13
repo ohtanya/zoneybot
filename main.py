@@ -98,7 +98,7 @@ async def time(interaction: discord.Interaction, member: discord.Member = None):
     target_tz = user_timezones.get(member.id)
     
     if not target_tz:
-        await interaction.response.send_message(f"⚠️ {BOT_NAME}: {member.display_name} hasn't set a timezone yet. Use `/settimezone`")
+        await interaction.response.send_message(f"⚠️ {BOT_NAME}: {member.display_name} hasn't set a timezone yet. Use `/settimezone`", ephemeral=True)
         return
     
     # Get the target user's current time
@@ -124,7 +124,7 @@ async def time(interaction: discord.Interaction, member: discord.Member = None):
             day_suffix = " YESTERDAY"
     
     await interaction.response.send_message(
-        f"🕒 {BOT_NAME}: It's {time_24h} ({time_12h}{day_suffix}) for {member.display_name}."
+        f"🕒 {BOT_NAME}: It's {time_24h} ({time_12h}{day_suffix}) for {member.display_name}.", ephemeral=True
     )
 
 @bot.tree.command(name="times", description="Show a list of all users and their local times")
@@ -172,9 +172,9 @@ async def times(interaction: discord.Interaction):
     print(f"DEBUG: Generated {len(lines)} lines for display")
     
     if not lines:
-        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\nNo users found in this server (check debug logs)")
+        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\nNo users found in this server (check debug logs)", ephemeral=True)
     else:
-        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\n" + "\n".join(lines))
+        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\n" + "\n".join(lines), ephemeral=True)
 
 @bot.tree.command(name="timezones", description="Search for available timezones by region or city")
 async def timezones(interaction: discord.Interaction, search: str = None):
@@ -192,7 +192,7 @@ async def timezones(interaction: discord.Interaction, search: str = None):
                             search_normalized.lower() in tz.lower()]
         
         if not filtered_timezones:
-            await interaction.response.send_message(f"❌ No timezones found containing '{search}'. Try a city, country, or region name.")
+            await interaction.response.send_message(f"❌ No timezones found containing '{search}'. Try a city, country, or region name.", ephemeral=True)
             return
         
         # Limit results to prevent message being too long
@@ -204,7 +204,7 @@ async def timezones(interaction: discord.Interaction, search: str = None):
         
         timezone_list = "\n".join([f"• `{tz}`" for tz in sorted(filtered_timezones)])
         await interaction.response.send_message(
-            f"🌍 **Timezones containing '{search}':**\n{timezone_list}{truncated_msg}"
+            f"🌍 **Timezones containing '{search}':**\n{timezone_list}{truncated_msg}", ephemeral=True
         )
     else:
         # Show popular timezones by region
@@ -237,6 +237,6 @@ async def timezones(interaction: discord.Interaction, search: str = None):
         response += "• Use `/timezones america` to see all American timezones\n"
         response += "• Format: `Continent/City` (e.g., `Europe/London`)"
         
-        await interaction.response.send_message(response)
+        await interaction.response.send_message(response, ephemeral=True)
 
 bot.run(TOKEN)
