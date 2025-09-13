@@ -26,17 +26,12 @@ BOT_NAME = "Zoneybot"
 async def on_ready():
     print(f"✅ {BOT_NAME} is online as {bot.user}")
     try:
-        # Sync commands to all guilds the bot is in (appears instantly)
-        for guild in bot.guilds:
-            synced = await bot.tree.sync(guild=guild)
-            print(f"✅ Synced {len(synced)} slash command(s) to guild {guild.name}")
-            # Debug: print all synced command names
-            for cmd in synced:
-                print(f"   - {cmd.name}: {cmd.description}")
-        
-        # Also sync globally as backup
-        global_synced = await bot.tree.sync()
-        print(f"✅ Synced {len(global_synced)} global slash command(s)")
+        # Just sync globally - guild sync was clearing commands
+        synced = await bot.tree.sync()
+        print(f"✅ Synced {len(synced)} global slash command(s)")
+        # Debug: print all synced command names
+        for cmd in synced:
+            print(f"   - {cmd.name}: {cmd.description}")
     except Exception as e:
         print(f"❌ Failed to sync commands: {e}")
 
