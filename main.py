@@ -13,6 +13,7 @@ if not TOKEN:
     exit(1)
 
 intents = discord.Intents.default()
+intents.members = True  # Enable members intent to see guild members
 # Remove message_content intent since we only use slash commands
 # intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
