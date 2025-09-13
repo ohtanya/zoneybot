@@ -35,39 +35,24 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Failed to sync commands: {e}")
 
-@bot.tree.command(name="settimezone", description="Set your timezone (e.g., America/Los_Angeles)")
-async def settimezone(interaction: discord.Interaction, timezone: str):
-    """Set your timezone"""
-    try:
-        pytz.timezone(timezone)  # validate
-        user_timezones[interaction.user.id] = timezone
-        await interaction.response.send_message(f"✅ {BOT_NAME}: Timezone set to `{timezone}` for {interaction.user.display_name}")
-    except Exception:
-        await interaction.response.send_message(
-            f"❌ {BOT_NAME}: Invalid timezone `{timezone}`\n"
-            f"Use `/timezones` to see available options or try formats like:\n"
-            f"• `America/New_York`\n"
-            f"• `Europe/London`\n"
-            f"• `Asia/Tokyo`"
-        )
-
-@bot.tree.command(name="ping", description="Simple ping test")
-async def ping(interaction: discord.Interaction):
-    """Simple ping command"""
-    await interaction.response.send_message("🏓 Pong!")
-
-@bot.tree.command(name="tzset", description="Set timezone for someone else")
-async def settimezone_admin(interaction: discord.Interaction, member: discord.Member, timezone: str):
-    """Admin command to set timezone for another user"""
-    # Check if user has administrator permissions
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(f"❌ {BOT_NAME}: You need administrator permissions to use this command.")
-        return
+@bot.tree.command(name="settimezone", description="Set timezone for yourself or another user (admin only for others)")
+async def settimezone(interaction: discord.Interaction, timezone: str, member: discord.Member = None):
+    """Set your timezone, or another user's timezone if you're an admin"""
+    # If member is specified, check for admin permissions
+    if member and member != interaction.user:
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(f"❌ {BOT_NAME}: You need administrator permissions to set someone else's timezone.")
+            return
+        target_user = member
+        action_text = f"Timezone set to `{timezone}` for {member.display_name} (set by admin {interaction.user.display_name})"
+    else:
+        target_user = interaction.user
+        action_text = f"Timezone set to `{timezone}` for {interaction.user.display_name}"
     
     try:
         pytz.timezone(timezone)  # validate
-        user_timezones[member.id] = timezone
-        await interaction.response.send_message(f"✅ {BOT_NAME}: Timezone set to `{timezone}` for {member.display_name} (set by admin {interaction.user.display_name})")
+        user_timezones[target_user.id] = timezone
+        await interaction.response.send_message(f"✅ {BOT_NAME}: {action_text}")
     except Exception:
         await interaction.response.send_message(
             f"❌ {BOT_NAME}: Invalid timezone `{timezone}`\n"
