@@ -51,6 +51,11 @@ async def settimezone(interaction: discord.Interaction, timezone: str):
             f"• `Asia/Tokyo`"
         )
 
+@bot.tree.command(name="ping", description="Simple ping test")
+async def ping(interaction: discord.Interaction):
+    """Simple ping command"""
+    await interaction.response.send_message("🏓 Pong!")
+
 @bot.tree.command(name="admintz", description="Admin: Set timezone for another user")
 async def settimezone_admin(interaction: discord.Interaction, member: discord.Member, timezone: str):
     """Admin command to set timezone for another user"""
