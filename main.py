@@ -145,9 +145,11 @@ async def times(interaction: discord.Interaction):
 
     lines = []
     for uid, tz in user_timezones.items():
+        print(f"DEBUG: Looking for user ID {uid} in guild {interaction.guild.name}")
         member = interaction.guild.get_member(uid)
-        print(f"DEBUG: Processing user {uid}, timezone {tz}, member found: {member is not None}")
+        print(f"DEBUG: Member lookup result: {member}")
         if member:
+            print(f"DEBUG: Found member {member.display_name}")
             user_time = datetime.now(pytz.timezone(tz))
             time_12h = user_time.strftime("%-I:%M%p").lower()
             
@@ -163,9 +165,15 @@ async def times(interaction: discord.Interaction):
                     day_suffix = " yesterday"
             
             lines.append(f"{member.display_name} — {time_12h}{day_suffix}")
+        else:
+            print(f"DEBUG: Could not find member for user ID {uid} in guild {interaction.guild.name}")
     
     print(f"DEBUG: Generated {len(lines)} lines for display")
-    await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\n" + "\n".join(lines))
+    
+    if not lines:
+        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\nNo users found in this server (check debug logs)")
+    else:
+        await interaction.response.send_message(f"**🌍 {BOT_NAME} Current Times:**\n" + "\n".join(lines))
 
 @bot.tree.command(name="timezones", description="Search for available timezones by region or city")
 async def timezones(interaction: discord.Interaction, search: str = None):
