@@ -3,6 +3,7 @@ from discord.ext import commands
 from datetime import datetime
 import pytz
 import os
+import json
 
 # Get bot token from environment variable
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -16,8 +17,34 @@ intents = discord.Intents.default()
 # intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
-# Store user timezones (replace with database for production)
-user_timezones = {}
+# File to store timezone data persistently
+TIMEZONE_FILE = "user_timezones.json"
+
+# Load user timezones from file
+def load_timezones():
+    try:
+        if os.path.exists(TIMEZONE_FILE):
+            with open(TIMEZONE_FILE, 'r') as f:
+                data = json.load(f)
+                # Convert string keys back to int (JSON stores keys as strings)
+                return {int(k): v for k, v in data.items()}
+    except Exception as e:
+        print(f"Error loading timezones: {e}")
+    return {}
+
+# Save user timezones to file
+def save_timezones():
+    try:
+        with open(TIMEZONE_FILE, 'w') as f:
+            # Convert int keys to string for JSON storage
+            data = {str(k): v for k, v in user_timezones.items()}
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving timezones: {e}")
+
+# Store user timezones (load from file on startup)
+user_timezones = load_timezones()
+print(f"Loaded {len(user_timezones)} saved timezones")
 
 # Optional: Name to display in messages
 BOT_NAME = "Zoneybot"
@@ -52,6 +79,7 @@ async def settimezone(interaction: discord.Interaction, timezone: str, member: d
     try:
         pytz.timezone(timezone)  # validate
         user_timezones[target_user.id] = timezone
+        save_timezones()  # Save to file after updating
         await interaction.response.send_message(f"✅ {BOT_NAME}: {action_text}")
     except Exception:
         await interaction.response.send_message(
